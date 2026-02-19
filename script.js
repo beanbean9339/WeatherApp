@@ -4,6 +4,17 @@ let currentForecastData = null;
 let currentMapWeatherData = null;
 let currentMapForecastData = null;
 
+function buildLocationString(city, state, country) {
+    let parts = [city];
+    if (state && state !== city) {
+        parts.push(state);
+    }
+    if (country) {
+        parts.push(country);
+    }
+    return parts.join(', ');
+}
+
 function toggleTemperature(unit) {
     if (currentUnit === unit) return;
     
@@ -77,118 +88,217 @@ function initializeMap() {
     const mapInfo = document.getElementById('map-info');
     
     let scale = 1;
-    let translateX = 0;
-    let translateY = 0;
-    let isDragging = false;
-    let startX, startY;
+    let isPanning = false;
+    let isDraggingPin = false;
+    let hasMouseMoved = false;
+    let startX = 0, startY = 0;
+    let mapOffsetX = 0, mapOffsetY = 0;
     
-    // Update zoom level display
+    // Store pin position relative to the map (not the wrapper)
+    let pinMapX = null;
+    let pinMapY = null;
+    
+    // Zoom functions
     window.zoomIn = function() {
-        scale = Math.min(scale + 0.25, 4);
-        updateMapTransform();
+        scale = Math.min(scale + 0.5, 5);
+        applyTransform();
+        updatePinPosition();
     };
     
     window.zoomOut = function() {
-        scale = Math.max(scale - 0.25, 1);
+        scale = Math.max(scale - 0.5, 1);
         if (scale === 1) {
-            translateX = 0;
-            translateY = 0;
+            mapOffsetX = 0;
+            mapOffsetY = 0;
         }
-        updateMapTransform();
+        applyTransform();
+        updatePinPosition();
     };
     
     window.resetZoom = function() {
         scale = 1;
-        translateX = 0;
-        translateY = 0;
-        updateMapTransform();
+        mapOffsetX = 0;
+        mapOffsetY = 0;
+        applyTransform();
+        pin.style.display = 'none';
+        pinMapX = null;
+        pinMapY = null;
+        mapInfo.innerHTML = 'Click anywhere on the map to check weather';
     };
     
-    function updateMapTransform() {
-        worldMap.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    function applyTransform() {
+        worldMap.style.transform = `translate(${mapOffsetX}px, ${mapOffsetY}px) scale(${scale})`;
         document.getElementById('zoom-level').textContent = Math.round(scale * 100) + '%';
+    }
+    
+    function updatePinPosition() {
+        if (pinMapX !== null && pinMapY !== null && pin.style.display !== 'none') {
+            const rect = worldMap.getBoundingClientRect();
+            const wrapperRect = mapWrapper.getBoundingClientRect();
+            
+            // Calculate pin position in wrapper coordinates based on map position
+            const pinX = rect.left - wrapperRect.left + pinMapX * scale;
+            const pinY = rect.top - wrapperRect.top + pinMapY * scale;
+            
+            pin.style.left = pinX + 'px';
+            pin.style.top = pinY + 'px';
+        }
+    }
+    
+    function getCoordinatesFromPixel(pixelX, pixelY) {
+        const rect = worldMap.getBoundingClientRect();
+        const wrapperRect = mapWrapper.getBoundingClientRect();
         
-        // Update cursor based on zoom
-        worldMap.style.cursor = scale > 1 ? 'move' : 'crosshair';
+        const mapX = (pixelX - rect.left) / scale;
+        const mapY = (pixelY - rect.top) / scale;
+        
+        const mapWidth = rect.width / scale;
+        const mapHeight = rect.height / scale;
+        
+        const lon = Math.max(-180, Math.min(180, (mapX / mapWidth) * 360 - 180));
+        const lat = Math.max(-90, Math.min(90, 90 - (mapY / mapHeight) * 180));
+        
+        return { lon, lat };
     }
     
     // Mouse wheel zoom
-    mapWrapper.addEventListener('wheel', function(event) {
-        event.preventDefault();
+    mapWrapper.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        const oldScale = scale;
+        scale = e.deltaY < 0 ? Math.min(scale + 0.2, 5) : Math.max(scale - 0.2, 1);
         
-        if (event.deltaY < 0) {
-            scale = Math.min(scale + 0.1, 4);
+        if (scale === 1) {
+            mapOffsetX = 0;
+            mapOffsetY = 0;
         } else {
-            scale = Math.max(scale - 0.1, 1);
-            if (scale === 1) {
-                translateX = 0;
-                translateY = 0;
-            }
+            const rect = mapWrapper.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const scaleChange = scale / oldScale;
+            mapOffsetX = mouseX - (mouseX - mapOffsetX) * scaleChange;
+            mapOffsetY = mouseY - (mouseY - mapOffsetY) * scaleChange;
         }
-        updateMapTransform();
+        applyTransform();
+        updatePinPosition();
     });
     
-    // Panning when zoomed
-    worldMap.addEventListener('mousedown', function(event) {
+    // Pin drag start
+    pin.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        isDraggingPin = true;
+        hasMouseMoved = false;
+        pin.classList.add('dragging');
+        document.body.style.cursor = 'grabbing';
+    });
+    
+    // Map panning start
+    mapWrapper.addEventListener('mousedown', function(e) {
+        if (e.target === pin || isDraggingPin) return;
+        
         if (scale > 1) {
-            isDragging = true;
-            startX = event.clientX - translateX;
-            startY = event.clientY - translateY;
+            isPanning = true;
+            hasMouseMoved = false;
+            startX = e.clientX - mapOffsetX;
+            startY = e.clientY - mapOffsetY;
             worldMap.style.cursor = 'grabbing';
         }
     });
     
-    worldMap.addEventListener('mousemove', function(event) {
-        const rect = worldMap.getBoundingClientRect();
-        const x = (event.clientX - rect.left) / scale;
-        const y = (event.clientY - rect.top) / scale;
-        
-        const lon = (x / (rect.width / scale)) * 360 - 180;
-        const lat = 90 - (y / (rect.height / scale)) * 180;
-        
-        if (isDragging && scale > 1) {
-            translateX = event.clientX - startX;
-            translateY = event.clientY - startY;
-            updateMapTransform();
-        } else {
-            mapInfo.textContent = `Lat: ${lat.toFixed(2)}°, Lon: ${lon.toFixed(2)}° ${scale > 1 ? '(Drag to pan, click to select)' : '(Click to get weather)'}`;
+    // Mouse move
+    document.addEventListener('mousemove', function(e) {
+        if (isDraggingPin) {
+            hasMouseMoved = true;
+            const wrapperRect = mapWrapper.getBoundingClientRect();
+            const rect = worldMap.getBoundingClientRect();
+            
+            const newX = e.clientX - wrapperRect.left;
+            const newY = e.clientY - wrapperRect.top;
+            
+            const boundedX = Math.max(0, Math.min(newX, wrapperRect.width));
+            const boundedY = Math.max(0, Math.min(newY, wrapperRect.height));
+            
+            pin.style.left = boundedX + 'px';
+            pin.style.top = boundedY + 'px';
+            
+            // Update pin's position relative to the map
+            pinMapX = (boundedX - (rect.left - wrapperRect.left)) / scale;
+            pinMapY = (boundedY - (rect.top - wrapperRect.top)) / scale;
+            
+            const coords = getCoordinatesFromPixel(e.clientX, e.clientY);
+            mapInfo.innerHTML = `<strong>📍 Lat: ${coords.lat.toFixed(2)}°, Lon: ${coords.lon.toFixed(2)}°</strong> <span class="map-hint">(Release to update)</span>`;
+            
+        } else if (isPanning) {
+            hasMouseMoved = true;
+            mapOffsetX = e.clientX - startX;
+            mapOffsetY = e.clientY - startY;
+            applyTransform();
+            updatePinPosition();
         }
     });
     
-    worldMap.addEventListener('mouseup', function() {
-        isDragging = false;
-        if (scale > 1) {
-            worldMap.style.cursor = 'move';
+    // Mouse up
+    document.addEventListener('mouseup', function(e) {
+        if (isDraggingPin) {
+            pin.classList.remove('dragging');
+            document.body.style.cursor = '';
+            
+            if (hasMouseMoved) {
+                const coords = getCoordinatesFromPixel(e.clientX, e.clientY);
+                mapInfo.innerHTML = `<strong>📍 Lat: ${coords.lat.toFixed(2)}°, Lon: ${coords.lon.toFixed(2)}°</strong> - Fetching...`;
+                getWeatherByCoordinates(coords.lat, coords.lon);
+            }
+            
+            isDraggingPin = false;
+            hasMouseMoved = false;
+        }
+        
+        if (isPanning) {
+            isPanning = false;
+            hasMouseMoved = false;
+            worldMap.style.cursor = scale > 1 ? 'grab' : 'crosshair';
         }
     });
     
-    worldMap.addEventListener('mouseleave', function() {
-        isDragging = false;
-    });
-    
-    worldMap.onclick = function(event) {
-        // Don't place pin if we were dragging
-        if (isDragging) return;
+    // Click to place pin
+    mapWrapper.addEventListener('click', function(e) {
+        if (hasMouseMoved || isDraggingPin || isPanning || e.target === pin) return;
         
+        const wrapperRect = mapWrapper.getBoundingClientRect();
         const rect = worldMap.getBoundingClientRect();
-        const x = (event.clientX - rect.left) / scale;
-        const y = (event.clientY - rect.top) / scale;
         
-        // Convert pixel coordinates to lat/lon
-        const lon = (x / (rect.width / scale)) * 360 - 180;
-        const lat = 90 - (y / (rect.height / scale)) * 180;
+        const x = e.clientX - wrapperRect.left;
+        const y = e.clientY - wrapperRect.top;
         
-        // Position the pin (accounting for transform)
         pin.style.left = x + 'px';
         pin.style.top = y + 'px';
         pin.style.display = 'block';
         
-        // Update info
-        mapInfo.textContent = `Lat: ${lat.toFixed(2)}°, Lon: ${lon.toFixed(2)}°`;
+        // Store pin position relative to the map
+        pinMapX = (x - (rect.left - wrapperRect.left)) / scale;
+        pinMapY = (y - (rect.top - wrapperRect.top)) / scale;
         
-        // Fetch weather for these coordinates
-        getWeatherByCoordinates(lat, lon);
-    };
+        pin.classList.remove('placed');
+        setTimeout(() => pin.classList.add('placed'), 10);
+        
+        const coords = getCoordinatesFromPixel(e.clientX, e.clientY);
+        mapInfo.innerHTML = `<strong>📍 Lat: ${coords.lat.toFixed(2)}°, Lon: ${coords.lon.toFixed(2)}°</strong> - Fetching...`;
+        getWeatherByCoordinates(coords.lat, coords.lon);
+    });
+    
+    // Pin hover
+    pin.addEventListener('mouseenter', function() {
+        if (!isDraggingPin) {
+            pin.style.transform = 'translate(-50%, -100%) scale(1.2)';
+            pin.style.cursor = 'grab';
+        }
+    });
+    
+    pin.addEventListener('mouseleave', function() {
+        if (!isDraggingPin) {
+            pin.style.transform = 'translate(-50%, -100%)';
+        }
+    });
 }
 
 function getWeatherByCoordinates(lat, lon) {
@@ -235,6 +345,21 @@ function displayMapWeather(data) {
     const humidity = data.main.humidity;
     const windSpeed = data.wind.speed;
     const feelsLike = convertTemp(data.main.feels_like);
+    
+    // Get detailed location info including state/province
+    if (data.coord) {
+        const apiKey = 'ae742a983d97f4208e6e659ba7fda017';
+        fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${data.coord.lat}&lon=${data.coord.lon}&limit=1&appid=${apiKey}`)
+            .then(response => response.json())
+            .then(geoData => {
+                if (geoData && geoData.length > 0) {
+                    const state = geoData[0].state || '';
+                    const locationString = buildLocationString(cityName, state, country);
+                    displayDiv.querySelector('h3').textContent = locationString;
+                }
+            })
+            .catch(err => console.log('Geocoding error:', err));
+    }
     
     const weatherHTML = `
         <div class="map-weather-card">
@@ -334,6 +459,7 @@ function displayWeather(data) {
         weatherInfoDiv.innerHTML = `<p>${data.message}</p>`;
     } else {
         const cityName = data.name;
+        const country = data.sys.country || '';
         const temperature = convertTemp(data.main.temp);
         const description = data.weather[0].description;
         const iconCode = data.weather[0].icon;
@@ -343,8 +469,24 @@ function displayWeather(data) {
             <p>${temperature}${getUnitSymbol()}</p>
         `;
 
+        // Get detailed location info including state/province
+        let locationText = cityName;
+        if (data.coord) {
+            const apiKey = 'ae742a983d97f4208e6e659ba7fda017';
+            fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${data.coord.lat}&lon=${data.coord.lon}&limit=1&appid=${apiKey}`)
+                .then(response => response.json())
+                .then(geoData => {
+                    if (geoData && geoData.length > 0) {
+                        const state = geoData[0].state || '';
+                        const locationString = buildLocationString(cityName, state, country);
+                        weatherInfoDiv.querySelector('p:first-child').textContent = locationString;
+                    }
+                })
+                .catch(err => console.log('Geocoding error:', err));
+        }
+
         const weatherHtml = `
-            <p>${cityName}</p>
+            <p>${cityName}${country ? ', ' + country : ''}</p>
             <p>${description}</p>
         `;
 
