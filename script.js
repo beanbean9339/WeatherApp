@@ -66,6 +66,7 @@ function displayWeather(data) {
         weatherIcon.alt = description;
 
         showImage();
+        updateBackground(data.weather[0].main, iconCode);
     }
 }
 
@@ -96,4 +97,97 @@ function displayHourlyForecast(hourlyData) {
 function showImage() {
     const weatherIcon = document.getElementById('weather-icon');
     weatherIcon.style.display = 'block'; // Make the image visible once it's loaded
+}
+
+function updateBackground(weatherMain, iconCode) {
+    const body = document.body;
+    const rainContainer = document.getElementById('rain-container');
+    const snowContainer = document.getElementById('snow-container');
+    
+    // Clear previous weather effects
+    body.className = '';
+    rainContainer.innerHTML = '';
+    snowContainer.innerHTML = '';
+    
+    const isNight = iconCode.includes('n');
+    
+    switch(weatherMain.toLowerCase()) {
+        case 'clear':
+            body.className = isNight ? 'clear-night' : 'sunny';
+            if (isNight) createStars();
+            break;
+        case 'clouds':
+            body.className = 'cloudy';
+            break;
+        case 'rain':
+        case 'drizzle':
+            body.className = 'rainy';
+            createRain();
+            break;
+        case 'thunderstorm':
+            body.className = 'thunderstorm';
+            createRain();
+            createLightning();
+            break;
+        case 'snow':
+            body.className = 'snowy';
+            createSnow();
+            break;
+        case 'mist':
+        case 'fog':
+        case 'haze':
+            body.className = 'misty';
+            break;
+        default:
+            body.className = 'default';
+    }
+}
+
+function createRain() {
+    const rainContainer = document.getElementById('rain-container');
+    for (let i = 0; i < 100; i++) {
+        const drop = document.createElement('div');
+        drop.className = 'rain-drop';
+        drop.style.left = Math.random() * 100 + '%';
+        drop.style.animationDelay = Math.random() * 2 + 's';
+        drop.style.animationDuration = (Math.random() * 0.5 + 0.5) + 's';
+        rainContainer.appendChild(drop);
+    }
+}
+
+function createSnow() {
+    const snowContainer = document.getElementById('snow-container');
+    for (let i = 0; i < 50; i++) {
+        const flake = document.createElement('div');
+        flake.className = 'snow-flake';
+        flake.innerHTML = '❄';
+        flake.style.left = Math.random() * 100 + '%';
+        flake.style.animationDelay = Math.random() * 3 + 's';
+        flake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        flake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+        snowContainer.appendChild(flake);
+    }
+}
+
+function createStars() {
+    const body = document.body;
+    for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 3 + 's';
+        body.appendChild(star);
+    }
+}
+
+function createLightning() {
+    setInterval(() => {
+        if (Math.random() > 0.95) {
+            document.body.style.backgroundColor = '#fff';
+            setTimeout(() => {
+                document.body.style.backgroundColor = '';
+            }, 100);
+        }
+    }, 500);
 }

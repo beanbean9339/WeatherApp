@@ -6,6 +6,130 @@ body {
     justify-content: center;
     height: 100vh;
     margin: 0;
+    overflow: hidden;
+    position: relative;
+    transition: background 1s ease;
+}
+
+/* Sunny Weather */
+body.sunny {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    animation: sunnyGradient 8s ease infinite;
+}
+
+@keyframes sunnyGradient {
+    0%, 100% { background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); }
+    50% { background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #ffd676 100%); }
+}
+
+/* Clear Night */
+body.clear-night {
+    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+}
+
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+/* Cloudy Weather */
+body.cloudy {
+    background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
+    animation: cloudyShift 10s ease infinite;
+}
+
+@keyframes cloudyShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Rainy Weather */
+body.rainy {
+    background: linear-gradient(135deg, #3a6186 0%, #89253e 100%);
+}
+
+#rain-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.rain-drop {
+    position: absolute;
+    top: -10px;
+    width: 2px;
+    height: 50px;
+    background: linear-gradient(transparent, rgba(255, 255, 255, 0.6));
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh);
+    }
+}
+
+/* Thunderstorm */
+body.thunderstorm {
+    background: linear-gradient(135deg, #232526 0%, #414345 100%);
+}
+
+/* Snowy Weather */
+body.snowy {
+    background: linear-gradient(135deg, #e6dada 0%, #274046 100%);
+}
+
+#snow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.snow-flake {
+    position: absolute;
+    top: -10px;
+    color: white;
+    animation: snowfall linear infinite;
+    opacity: 0.8;
+}
+
+@keyframes snowfall {
+    to {
+        transform: translateY(100vh) rotate(360deg);
+    }
+}
+
+/* Misty/Foggy Weather */
+body.misty {
+    background: linear-gradient(135deg, #606c88 0%, #3f4c6b 100%);
+    animation: mistyPulse 5s ease-in-out infinite;
+}
+
+@keyframes mistyPulse {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; }
+}
+
+/* Default */
+body.default {
+    background: linear-gradient(135deg, #8C52FF 0%, #5E35B1 100%);
 }
 
 #weather-container {
@@ -17,6 +141,8 @@ body {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
+    position: relative;
+    z-index: 10;
 }
 
 h2, label, p {
