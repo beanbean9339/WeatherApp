@@ -38,6 +38,10 @@
         
         <div id="weather-container">
             <h2>Weather App</h2>
+            <div id="temp-toggle">
+                <span class="temp-unit active" onclick="toggleTemperature('C')">°C</span>
+                <span class="temp-unit" onclick="toggleTemperature('F')">°F</span>
+            </div>
             <input type="text" id="city" placeholder="Enter city">
             <button onclick="getWeather()">Search</button>
 
@@ -55,6 +59,16 @@
     <div id="map-tab" class="tab-content">
         <div id="map-container">
             <h2 id="map-title">🌍 Click anywhere on the map to check weather</h2>
+            <div id="map-temp-toggle">
+                <span class="temp-unit active" onclick="toggleTemperature('C')">°C</span>
+                <span class="temp-unit" onclick="toggleTemperature('F')">°F</span>
+            </div>
+            <div id="zoom-controls">
+                <button onclick="zoomIn()" title="Zoom In">➕</button>
+                <button onclick="zoomOut()" title="Zoom Out">➖</button>
+                <button onclick="resetZoom()" title="Reset Zoom">🔄</button>
+                <span id="zoom-level">100%</span>
+            </div>
             <div id="map-info">Loading coordinates...</div>
             <div id="map-wrapper">
                 <img id="world-map" src="https://upload.wikimedia.org/wikipedia/commons/8/83/Equirectangular_projection_SW.jpg" alt="World Map">
