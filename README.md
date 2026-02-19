@@ -1,9 +1,6 @@
 # 🌤️ Weather Dashboard
 
-A beautiful, interactive weather application with a windowed interface that makes checking the weather a delightful experience. Built with vanilla JavaScript, HTML, and CSS, featuring draggable/resizable windows, animated elements, and multiple ways to explore weather around the world.
-
-![Weather Dashboard](https://img.shields.io/badge/version-1.0.0-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+A beautiful, interactive weather application with a windowed interface. Built with vanilla JavaScript, HTML, and CSS, featuring draggable/resizable windows, animated elements, and multiple ways to explore weather around the world.
 
 ## ✨ Features
 
@@ -79,20 +76,11 @@ A beautiful, interactive weather application with a windowed interface that make
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- Internet connection (for API calls and map images)
+- Modern web browser
+- Internet connection
 
 ### Installation
-
-1. **Clone or download the repository**:
-```bash
-git clone https://github.com/yourusername/weather-dashboard.git
-cd weather-dashboard
-```
-
-2. **Open in browser**:
-   - Simply open `index.html` in your web browser
-   - No build process or dependencies required!
+Simply open `index.html` in your web browser. No build process or dependencies required!
 
 ### API Key
 
@@ -148,10 +136,11 @@ WeatherApp-1/
 ├── index.html          # Main HTML structure
 ├── script.js           # Application logic (1346 lines)
 ├── style.css           # Styling and animations (2362 lines)
+├── favicon.svg         # Weather icon favicon
 └── README.md           # This file
 ```
 
-### File Breakdown
+### Files
 
 #### [index.html](index.html)
 - Welcome screen modal
@@ -332,35 +321,8 @@ Change default CSS positions in [style.css](style.css):
 - ✅ Edge
 - ❌ Internet Explorer (not supported)
 
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 👨‍💻 Author
-
-Created with ❤️ by [Your Name]
-
-## 🙏 Acknowledgments
+## � Credits
 
 - **OpenWeatherMap** for the weather API
 - **Google Fonts** for Quicksand and Varela Round fonts
 - **Wikipedia** for the world map image
-- Weather icons from OpenWeatherMap
-
-## 📞 Support
-
-For support, email your.email@example.com or open an issue in the repository.
-
----
-
-**Enjoy exploring the weather! 🌤️**
