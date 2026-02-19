@@ -4,6 +4,15 @@ let currentForecastData = null;
 let currentMapWeatherData = null;
 let currentMapForecastData = null;
 
+// Welcome screen functions
+function closeWelcome() {
+    const overlay = document.getElementById('welcome-overlay');
+    overlay.style.animation = 'fadeOut 0.4s ease';
+    setTimeout(() => {
+        overlay.style.display = 'none';
+    }, 400);
+}
+
 function buildLocationString(city, state, country) {
     let parts = [city];
     if (state && state !== city) {
@@ -662,6 +671,9 @@ function displayWeather(data) {
         showImage();
         updateBackground(data.weather[0].main, iconCode);
         
+        // Update clock with location's timezone
+        updateClock(data.timezone, cityName);
+        
         // Update map pin and weather for this location
         if (data.coord) {
             updateMapPin(data.coord.lat, data.coord.lon);
@@ -1127,7 +1139,15 @@ function toggleWindowVisibility(windowId) {
 }
 
 function updateLauncherCheckboxes() {
-    const windows = ['directions-window', 'world-view', 'weather-finder-window', 'weather-container', 'map-container'];
+    const windows = [
+        'directions-window', 
+        'world-view', 
+        'weather-finder-window',
+        'clock-window',
+        'current-location-window',
+        'weather-container', 
+        'map-container'
+    ];
     
     windows.forEach(windowId => {
         const window = document.getElementById(windowId);
@@ -1139,10 +1159,95 @@ function updateLauncherCheckboxes() {
     });
 }
 
+// Clock functionality
+let currentTimezone = 0;
+let clockInterval = null;
+
+function updateClock(timezoneOffset, locationName) {
+    currentTimezone = timezoneOffset;
+    document.getElementById('clock-location').textContent = locationName || 'Select a location';
+    
+    // Clear existing interval
+    if (clockInterval) {
+        clearInterval(clockInterval);
+    }
+    
+    // Update clock immediately and then every second
+    updateClockDisplay();
+    clockInterval = setInterval(updateClockDisplay, 1000);
+}
+
+function updateClockDisplay() {
+    if (currentTimezone === null) return;
+    
+    const now = new Date();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const localTime = new Date(utc + (currentTimezone * 1000));
+    
+    const timeString = localTime.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+    
+    const dateString = localTime.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    });
+    
+    document.getElementById('clock-time').textContent = timeString;
+    document.getElementById('clock-date').textContent = dateString;
+}
+
+// Current location functionality
+function getMyLocation() {
+    const statusDiv = document.getElementById('location-status');
+    
+    if (!navigator.geolocation) {
+        statusDiv.innerHTML = '<span style="color: #e07a5f;">❌ Geolocation not supported by your browser</span>';
+        return;
+    }
+    
+    statusDiv.innerHTML = '<span style="color: #f4a259;">📍 Getting your location...</span>';
+    
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            statusDiv.innerHTML = `<span style="color: #81b29a;">✓ Location found!</span><br>Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+            
+            // Fetch weather for current location
+            getWeatherByCoordinatesForDashboard(lat, lon);
+        },
+        (error) => {
+            let errorMessage = 'Unable to retrieve location';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = 'Location permission denied';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = 'Location information unavailable';
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = 'Location request timed out';
+                    break;
+            }
+            statusDiv.innerHTML = `<span style="color: #e07a5f;">❌ ${errorMessage}</span>`;
+        }
+    );
+}
+
 // Initialize draggable windows on page load
 document.addEventListener('DOMContentLoaded', () => {
     initDraggableWindows();
     initResizableWindows();
     initializeMap();
     updateLauncherCheckboxes();
+    
+    // Start clock with default timezone (UTC)
+    updateClock(0, 'UTC');
 });

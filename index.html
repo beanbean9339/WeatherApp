@@ -10,6 +10,39 @@
     <div id="rain-container"></div>
     <div id="snow-container"></div>
     
+    <!-- Welcome Screen -->
+    <div id="welcome-overlay">
+        <div id="welcome-modal" class="draggable">
+            <div id="welcome-content">
+                <div class="welcome-section">
+                    <h2>🌤️ Welcome to Weather Dashboard</h2>
+                    <p>A weather dashboard designed with warmth and personality. This isn't just another weather app—it's a thoughtfully crafted interface that makes checking the weather a delightful experience.</p>
+                </div>
+                
+                <div class="welcome-section">
+                    <h3>🪟 Window Management</h3>
+                    <p>Each feature lives in its own draggable, resizable window. Move them around, resize them in 8 directions, and organize your workspace however you like. Click any window to bring it to the front!</p>
+                </div>
+                
+                <div class="welcome-section">
+                    <h3>✨ Features</h3>
+                    <ul>
+                        <li><strong>Popular Destinations:</strong> Quick access to major cities worldwide</li>
+                        <li><strong>Weather Finder:</strong> Discover random locations with your desired weather conditions</li>
+                        <li><strong>Interactive Map:</strong> Drag the pin anywhere to explore weather at any location</li>
+                        <li><strong>Real-time Data:</strong> Current conditions, temperature, and local time</li>
+                        <li><strong>Window Manager:</strong> Toggle visibility of any window using the menu (☰)</li>
+                    </ul>
+                </div>
+                
+                <div class="welcome-section welcome-footer">
+                    <p><em>Designed with care for beautiful interfaces and powerful functionality</em></p>
+                    <button class="get-started-btn" onclick="closeWelcome()">Get Started →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Main Content -->
     <div id="main-tab" class="tab-content active">
         <div id="world-view" class="draggable resizable">
@@ -109,6 +142,53 @@
             </div>
         </div>
         
+        <!-- Clock Window -->
+        <div id="clock-window" class="draggable resizable">
+            <div class="window-header">
+                <span class="window-title">Local Time</span>
+                <div class="window-controls">
+                    <button class="minimize-btn" onclick="minimizeWindow('clock-window')" title="Minimize">−</button>
+                    <button class="close-btn" onclick="closeWindow('clock-window')" title="Close">×</button>
+                </div>
+            </div>
+            <div class="resize-handle resize-n"></div>
+            <div class="resize-handle resize-s"></div>
+            <div class="resize-handle resize-e"></div>
+            <div class="resize-handle resize-w"></div>
+            <div class="resize-handle resize-ne"></div>
+            <div class="resize-handle resize-nw"></div>
+            <div class="resize-handle resize-se"></div>
+            <div class="resize-handle resize-sw"></div>
+            <div id="clock-content">
+                <div id="clock-location">Select a location</div>
+                <div id="clock-time">--:--:--</div>
+                <div id="clock-date">--- --, ----</div>
+            </div>
+        </div>
+        
+        <!-- Current Location Window -->
+        <div id="current-location-window" class="draggable resizable">
+            <div class="window-header">
+                <span class="window-title">My Location</span>
+                <div class="window-controls">
+                    <button class="minimize-btn" onclick="minimizeWindow('current-location-window')" title="Minimize">−</button>
+                    <button class="close-btn" onclick="closeWindow('current-location-window')" title="Close">×</button>
+                </div>
+            </div>
+            <div class="resize-handle resize-n"></div>
+            <div class="resize-handle resize-s"></div>
+            <div class="resize-handle resize-e"></div>
+            <div class="resize-handle resize-w"></div>
+            <div class="resize-handle resize-ne"></div>
+            <div class="resize-handle resize-nw"></div>
+            <div class="resize-handle resize-se"></div>
+            <div class="resize-handle resize-sw"></div>
+            <div id="current-location-content">
+                <button class="location-btn" onclick="getMyLocation()">📍 Get My Location</button>
+                <div id="location-status"></div>
+            </div>
+        </div>
+        
         <div id="weather-container" class="draggable resizable">
             <div class="window-header">
                 <span class="window-title">Weather Dashboard</span>
@@ -195,6 +275,14 @@
         <div class="launcher-item">
             <input type="checkbox" id="toggle-weather-finder-window" checked onchange="toggleWindowVisibility('weather-finder-window')">
             <label for="toggle-weather-finder-window">Weather Finder</label>
+        </div>
+        <div class="launcher-item">
+            <input type="checkbox" id="toggle-clock-window" checked onchange="toggleWindowVisibility('clock-window')">
+            <label for="toggle-clock-window">Local Time</label>
+        </div>
+        <div class="launcher-item">
+            <input type="checkbox" id="toggle-current-location-window" checked onchange="toggleWindowVisibility('current-location-window')">
+            <label for="toggle-current-location-window">My Location</label>
         </div>
         <div class="launcher-item">
             <input type="checkbox" id="toggle-weather-container" checked onchange="toggleWindowVisibility('weather-container')">
