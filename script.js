@@ -799,9 +799,31 @@ let isDragging = false;
 let currentDraggable = null;
 let offsetX = 0;
 let offsetY = 0;
+let highestZIndex = 1000;
+
+function bringToFront(element) {
+    highestZIndex++;
+    element.style.zIndex = highestZIndex;
+    console.log(`Bringing ${element.id} to front with z-index: ${highestZIndex}`);
+}
 
 function initDraggableWindows() {
     const draggables = document.querySelectorAll('.draggable');
+    
+    // Global listener to bring clicked window to front
+    document.addEventListener('mousedown', (e) => {
+        if (isResizing) return;
+        
+        // Find which draggable window was clicked (if any)
+        let target = e.target;
+        while (target && target !== document.body) {
+            if (target.classList && target.classList.contains('draggable')) {
+                bringToFront(target);
+                break;
+            }
+            target = target.parentElement;
+        }
+    }, true);
     
     draggables.forEach(draggable => {
         const header = draggable.querySelector('.window-header');
@@ -823,7 +845,6 @@ function initDraggableWindows() {
             
             draggable.classList.add('dragging');
             draggable.style.position = 'fixed';
-            draggable.style.zIndex = '1000';
         });
     });
     
@@ -851,7 +872,6 @@ function initDraggableWindows() {
     document.addEventListener('mouseup', () => {
         if (currentDraggable) {
             currentDraggable.classList.remove('dragging');
-            currentDraggable.style.zIndex = '100';
         }
         isDragging = false;
         currentDraggable = null;
@@ -1107,7 +1127,7 @@ function toggleWindowVisibility(windowId) {
 }
 
 function updateLauncherCheckboxes() {
-    const windows = ['world-view', 'weather-finder-window', 'weather-container', 'map-container'];
+    const windows = ['directions-window', 'world-view', 'weather-finder-window', 'weather-container', 'map-container'];
     
     windows.forEach(windowId => {
         const window = document.getElementById(windowId);

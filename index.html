@@ -44,6 +44,40 @@
             </div>
         </div>
         
+        <!-- Directions Window -->
+        <div id="directions-window" class="draggable resizable">
+            <div class="window-header">
+                <span class="window-title">How It Works</span>
+                <div class="window-controls">
+                    <button class="minimize-btn" onclick="minimizeWindow('directions-window')" title="Minimize">−</button>
+                    <button class="close-btn" onclick="closeWindow('directions-window')" title="Close">×</button>
+                </div>
+            </div>
+            <div class="resize-handle resize-n"></div>
+            <div class="resize-handle resize-s"></div>
+            <div class="resize-handle resize-e"></div>
+            <div class="resize-handle resize-w"></div>
+            <div class="resize-handle resize-ne"></div>
+            <div class="resize-handle resize-nw"></div>
+            <div class="resize-handle resize-se"></div>
+            <div class="resize-handle resize-sw"></div>
+            <div id="directions-content">
+                <h4>🌤️ Welcome to Weather Dashboard</h4>
+                <div class="direction-section">
+                    <h5>🎯 Popular Destinations</h5>
+                    <p>Click any city card to instantly view its weather</p>
+                </div>
+                <div class="direction-section">
+                    <h5>🎲 Weather Finder</h5>
+                    <p>Feeling adventurous? Click a weather button to discover a random city with your desired conditions!</p>
+                </div>
+                <div class="direction-section">
+                    <h5>🗺️ Explore the World</h5>
+                    <p>Click anywhere on the map or drag the pin to explore weather at any location</p>
+                </div>
+            </div>
+        </div>
+        
         <!-- Weather Finder Window -->
         <div id="weather-finder-window" class="draggable resizable">
             <div class="window-header">
@@ -150,6 +184,10 @@
     
     <div id="launcher-menu" style="display: none;">
         <h3>Window Manager</h3>
+        <div class="launcher-item">
+            <input type="checkbox" id="toggle-directions-window" checked onchange="toggleWindowVisibility('directions-window')">
+            <label for="toggle-directions-window">How It Works</label>
+        </div>
         <div class="launcher-item">
             <input type="checkbox" id="toggle-world-view" checked onchange="toggleWindowVisibility('world-view')">
             <label for="toggle-world-view">Popular Destinations</label>
