@@ -29,8 +29,10 @@
                     <ul>
                         <li><strong>Popular Destinations:</strong> Quick access to major cities worldwide</li>
                         <li><strong>Weather Finder:</strong> Discover random locations with your desired weather conditions</li>
+                        <li><strong>Flip Clock:</strong> Animated clock showing local time for any location you explore</li>
+                        <li><strong>My Location:</strong> Get weather for your current GPS coordinates instantly</li>
                         <li><strong>Interactive Map:</strong> Drag the pin anywhere to explore weather at any location</li>
-                        <li><strong>Real-time Data:</strong> Current conditions, temperature, and local time</li>
+                        <li><strong>Weather Dashboard:</strong> Current conditions, temperature, and hourly forecast</li>
                         <li><strong>Window Manager:</strong> Toggle visibility of any window using the menu (☰)</li>
                     </ul>
                 </div>
@@ -102,7 +104,15 @@
                 </div>
                 <div class="direction-section">
                     <h5>🎲 Weather Finder</h5>
-                    <p>Feeling adventurous? Click a weather button to discover a random city with your desired conditions!</p>
+                    <p>Click a weather button to discover a random city with your desired conditions</p>
+                </div>
+                <div class="direction-section">
+                    <h5>🕐 Local Time Clock</h5>
+                    <p>Watch the flip clock update with the local time of any location you explore</p>
+                </div>
+                <div class="direction-section">
+                    <h5>📍 My Location</h5>
+                    <p>Click "Get My Location" to instantly view weather at your current coordinates</p>
                 </div>
                 <div class="direction-section">
                     <h5>🗺️ Explore the World</h5>
@@ -161,7 +171,31 @@
             <div class="resize-handle resize-sw"></div>
             <div id="clock-content">
                 <div id="clock-location">Select a location</div>
-                <div id="clock-time">--:--:--</div>
+                <div id="flip-clock">
+                    <div class="flip-clock-group">
+                        <div class="flip-unit" id="flip-hours">
+                            <div class="flip-card">
+                                <div class="flip-card-top">00</div>
+                                <div class="flip-card-bottom">00</div>
+                            </div>
+                        </div>
+                        <span class="flip-colon">:</span>
+                        <div class="flip-unit" id="flip-minutes">
+                            <div class="flip-card">
+                                <div class="flip-card-top">00</div>
+                                <div class="flip-card-bottom">00</div>
+                            </div>
+                        </div>
+                        <span class="flip-colon">:</span>
+                        <div class="flip-unit" id="flip-seconds">
+                            <div class="flip-card">
+                                <div class="flip-card-top">00</div>
+                                <div class="flip-card-bottom">00</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="flip-ampm">AM</div>
+                </div>
                 <div id="clock-date">--- --, ----</div>
             </div>
         </div>

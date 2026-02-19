@@ -1162,6 +1162,7 @@ function updateLauncherCheckboxes() {
 // Clock functionality
 let currentTimezone = 0;
 let clockInterval = null;
+let previousTime = { hours: null, minutes: null, seconds: null };
 
 function updateClock(timezoneOffset, locationName) {
     currentTimezone = timezoneOffset;
@@ -1172,9 +1173,32 @@ function updateClock(timezoneOffset, locationName) {
         clearInterval(clockInterval);
     }
     
+    // Reset previous time to force initial flip
+    previousTime = { hours: null, minutes: null, seconds: null };
+    
     // Update clock immediately and then every second
     updateClockDisplay();
     clockInterval = setInterval(updateClockDisplay, 1000);
+}
+
+function flipCard(unit, value) {
+    const card = document.querySelector(`#flip-${unit} .flip-card`);
+    const top = card.querySelector('.flip-card-top');
+    const bottom = card.querySelector('.flip-card-bottom');
+    
+    // Add flipping animation
+    card.classList.add('flipping');
+    
+    // Update values after a brief delay
+    setTimeout(() => {
+        top.textContent = value;
+        bottom.textContent = value;
+    }, 300);
+    
+    // Remove animation class after animation completes
+    setTimeout(() => {
+        card.classList.remove('flipping');
+    }, 600);
 }
 
 function updateClockDisplay() {
@@ -1184,13 +1208,39 @@ function updateClockDisplay() {
     const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
     const localTime = new Date(utc + (currentTimezone * 1000));
     
-    const timeString = localTime.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    });
+    let hours = localTime.getHours();
+    const minutes = localTime.getMinutes();
+    const seconds = localTime.getSeconds();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
     
+    // Convert to 12-hour format
+    hours = hours % 12 || 12;
+    
+    // Format with leading zeros
+    const hoursStr = hours.toString().padStart(2, '0');
+    const minutesStr = minutes.toString().padStart(2, '0');
+    const secondsStr = seconds.toString().padStart(2, '0');
+    
+    // Flip cards only if values changed
+    if (previousTime.hours !== hoursStr) {
+        flipCard('hours', hoursStr);
+        previousTime.hours = hoursStr;
+    }
+    
+    if (previousTime.minutes !== minutesStr) {
+        flipCard('minutes', minutesStr);
+        previousTime.minutes = minutesStr;
+    }
+    
+    if (previousTime.seconds !== secondsStr) {
+        flipCard('seconds', secondsStr);
+        previousTime.seconds = secondsStr;
+    }
+    
+    // Update AM/PM
+    document.getElementById('flip-ampm').textContent = ampm;
+    
+    // Update date
     const dateString = localTime.toLocaleDateString('en-US', {
         weekday: 'short',
         month: 'short',
@@ -1198,7 +1248,6 @@ function updateClockDisplay() {
         year: 'numeric'
     });
     
-    document.getElementById('clock-time').textContent = timeString;
     document.getElementById('clock-date').textContent = dateString;
 }
 
