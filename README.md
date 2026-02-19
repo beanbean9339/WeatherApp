@@ -2,6 +2,10 @@
 
 A beautiful, interactive weather application with a windowed interface. Built with vanilla JavaScript, HTML, and CSS, featuring draggable/resizable windows, animated elements, and multiple ways to explore weather around the world.
 
+🔗 **Live Demo**: [https://isabeansweatherapp.netlify.app/](https://isabeansweatherapp.netlify.app/)
+
+📦 **Repository**: `git clone https://github.com/beanbean9339/WeatherApp.git`
+
 ## ✨ Features
 
 ### 🪟 Multi-Window Interface
