@@ -9,19 +9,63 @@
 <body>
     <div id="rain-container"></div>
     <div id="snow-container"></div>
-    <div id="weather-container">
-        <h2>Weather App</h2>
-        <input type="text" id="city" placeholder="Enter city">
-        <button onclick="getWeather()">Search</button>
-
-        <img id="weather-icon" alt="Weather Icon">
-
-        <div id="temp-div"></div>
-
-        <div id="weather-info"></div>
-
-        <div id="hourly-forecast"></div>
+    
+    <!-- Tab Navigation -->
+    <div id="tab-navigation">
+        <button class="tab-btn active" onclick="switchTab('main')">🏠 Home</button>
+        <button class="tab-btn" onclick="switchTab('map')">🗺️ World Map</button>
     </div>
+    
+    <!-- Main Weather Tab -->
+    <div id="main-tab" class="tab-content active">
+        <div id="world-view">
+            <h3>🌍 World Cities</h3>
+            <div id="cities-grid">
+                <div class="city-card" onclick="getCityWeather('Tokyo')">🗼 Tokyo</div>
+                <div class="city-card" onclick="getCityWeather('New York')">🗽 New York</div>
+                <div class="city-card" onclick="getCityWeather('London')">🏰 London</div>
+                <div class="city-card" onclick="getCityWeather('Paris')">🗼 Paris</div>
+                <div class="city-card" onclick="getCityWeather('Dubai')">🏙️ Dubai</div>
+                <div class="city-card" onclick="getCityWeather('Sydney')">🏖️ Sydney</div>
+                <div class="city-card" onclick="getCityWeather('Mumbai')">🕌 Mumbai</div>
+                <div class="city-card" onclick="getCityWeather('Moscow')">❄️ Moscow</div>
+                <div class="city-card" onclick="getCityWeather('Rio de Janeiro')">🏖️ Rio</div>
+                <div class="city-card" onclick="getCityWeather('Singapore')">🌆 Singapore</div>
+                <div class="city-card" onclick="getCityWeather('Toronto')">🍁 Toronto</div>
+                <div class="city-card" onclick="getCityWeather('Cairo')">🐪 Cairo</div>
+            </div>
+        </div>
+        
+        <div id="weather-container">
+            <h2>Weather App</h2>
+            <input type="text" id="city" placeholder="Enter city">
+            <button onclick="getWeather()">Search</button>
+
+            <img id="weather-icon" alt="Weather Icon">
+
+            <div id="temp-div"></div>
+
+            <div id="weather-info"></div>
+
+            <div id="hourly-forecast"></div>
+        </div>
+    </div>
+    
+    <!-- World Map Tab -->
+    <div id="map-tab" class="tab-content">
+        <div id="map-container">
+            <h2 id="map-title">🌍 Click anywhere on the map to check weather</h2>
+            <div id="map-info">Loading coordinates...</div>
+            <div id="map-wrapper">
+                <img id="world-map" src="https://upload.wikimedia.org/wikipedia/commons/8/83/Equirectangular_projection_SW.jpg" alt="World Map">
+                <div id="pin" class="map-pin">📍</div>
+            </div>
+            <div id="map-weather-display">
+                <p>Click on the map to see weather data</p>
+            </div>
+        </div>
+    </div>
+    
     <script src="./script.js"></script>
 </body>
 </html>
