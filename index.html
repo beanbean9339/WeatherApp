@@ -126,23 +126,16 @@
             <div class="resize-handle resize-nw"></div>
             <div class="resize-handle resize-se"></div>
             <div class="resize-handle resize-sw"></div>
-            <div id="map-temp-toggle">
-                <span class="temp-unit active" onclick="toggleTemperature('C')">°C</span>
-                <span class="temp-unit" onclick="toggleTemperature('F')">°F</span>
-            </div>
             <div id="zoom-controls">
                 <button onclick="zoomIn()" title="Zoom In">+</button>
                 <button onclick="zoomOut()" title="Zoom Out">−</button>
                 <button onclick="resetZoom()" title="Reset Zoom">↻</button>
                 <span id="zoom-level">100%</span>
             </div>
-            <div id="map-info">Click anywhere to discover the weather</div>
+            <div id="map-info">Click or drag pin to select location</div>
             <div id="map-wrapper">
                 <img id="world-map" src="https://upload.wikimedia.org/wikipedia/commons/8/83/Equirectangular_projection_SW.jpg" alt="World Map">
                 <div id="pin" class="map-pin">📍</div>
-            </div>
-            <div id="map-weather-display">
-                <p>Pin a location to see its atmospheric mood</p>
             </div>
         </div>
     </div>

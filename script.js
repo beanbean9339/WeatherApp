@@ -329,11 +329,15 @@ function initializeMap() {
         hasMouseMoved = false;
         pin.classList.add('dragging');
         document.body.style.cursor = 'grabbing';
+        
+        // Ensure map doesn't pan while dragging pin
+        isPanning = false;
     });
     
     // Map panning start
     mapWrapper.addEventListener('mousedown', function(e) {
-        if (e.target === pin || isDraggingPin) return;
+        // Don't start panning if clicking on pin or any child of pin
+        if (e.target === pin || e.target.parentElement === pin || isDraggingPin) return;
         
         if (scale > 1) {
             isPanning = true;
@@ -384,8 +388,10 @@ function initializeMap() {
             
             if (hasMouseMoved) {
                 const coords = getCoordinatesFromPixel(e.clientX, e.clientY);
-                mapInfo.innerHTML = `<strong>📍 Lat: ${coords.lat.toFixed(2)}°, Lon: ${coords.lon.toFixed(2)}°</strong> - Fetching...`;
-                getWeatherByCoordinates(coords.lat, coords.lon);
+                mapInfo.innerHTML = `<strong>📍 Lat: ${coords.lat.toFixed(2)}°, Lon: ${coords.lon.toFixed(2)}°</strong>`;
+                
+                // Update the main weather dashboard only
+                getWeatherByCoordinatesForDashboard(coords.lat, coords.lon);
             }
             
             isDraggingPin = false;
@@ -401,7 +407,8 @@ function initializeMap() {
     
     // Click to place pin
     mapWrapper.addEventListener('click', function(e) {
-        if (hasMouseMoved || isDraggingPin || isPanning || e.target === pin) return;
+        // Don't place new pin if clicking on existing pin or any child of pin
+        if (hasMouseMoved || isDraggingPin || isPanning || e.target === pin || e.target.parentElement === pin) return;
         
         const wrapperRect = mapWrapper.getBoundingClientRect();
         const rect = worldMap.getBoundingClientRect();
@@ -421,8 +428,10 @@ function initializeMap() {
         setTimeout(() => pin.classList.add('placed'), 10);
         
         const coords = getCoordinatesFromPixel(e.clientX, e.clientY);
-        mapInfo.innerHTML = `<strong>📍 Lat: ${coords.lat.toFixed(2)}°, Lon: ${coords.lon.toFixed(2)}°</strong> - Fetching...`;
-        getWeatherByCoordinates(coords.lat, coords.lon);
+        mapInfo.innerHTML = `<strong>📍 Lat: ${coords.lat.toFixed(2)}°, Lon: ${coords.lon.toFixed(2)}°</strong>`;
+        
+        // Update the main weather dashboard only
+        getWeatherByCoordinatesForDashboard(coords.lat, coords.lon);
     });
     
     // Pin hover
@@ -440,7 +449,7 @@ function initializeMap() {
     });
 }
 
-function getWeatherByCoordinates(lat, lon) {
+function getWeatherByCoordinatesForDashboard(lat, lon) {
     const apiKey = 'ae742a983d97f4208e6e659ba7fda017';
     const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`;
     const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}`;
@@ -448,21 +457,32 @@ function getWeatherByCoordinates(lat, lon) {
     fetch(weatherUrl)
         .then(response => response.json())
         .then(data => {
-            displayMapWeather(data);
+            displayWeather(data);
+            // Update city input with location name
+            if (data.name) {
+                document.getElementById('city').value = data.name;
+            }
         })
         .catch(error => {
-            console.error('Error fetching weather data:', error);
-            document.getElementById('map-weather-display').innerHTML = '<p>Error fetching weather data</p>';
+            console.error('Error fetching weather data for dashboard:', error);
         });
     
     fetch(forecastUrl)
         .then(response => response.json())
         .then(data => {
-            displayMapForecast(data.list);
+            displayHourlyForecast(data.list);
         })
         .catch(error => {
-            console.error('Error fetching forecast data:', error);
+            console.error('Error fetching forecast data for dashboard:', error);
         });
+}
+
+function getWeatherByCoordinates(lat, lon) {
+    // This function now just updates the info display with coordinates
+    const mapInfo = document.getElementById('map-info');
+    if (mapInfo) {
+        mapInfo.innerHTML = `<strong>📍 Lat: ${lat.toFixed(2)}°, Lon: ${lon.toFixed(2)}°</strong>`;
+    }
 }
 
 function displayMapWeather(data) {
@@ -961,6 +981,10 @@ function initResizableWindows() {
                 resizable.classList.add('resizing');
                 document.body.style.cursor = handle.style.cursor || window.getComputedStyle(handle).cursor;
                 document.body.style.userSelect = 'none';
+                
+                // Enable pointer events on all resize handles during resize
+                const allHandles = resizable.querySelectorAll('.resize-handle');
+                allHandles.forEach(h => h.style.pointerEvents = 'auto');
             });
         });
     });
@@ -1032,6 +1056,10 @@ function initResizableWindows() {
             currentResizable.classList.remove('resizing');
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
+            
+            // Reset pointer events on edge handles to none
+            const allHandles = currentResizable.querySelectorAll('.resize-n, .resize-s, .resize-e, .resize-w');
+            allHandles.forEach(h => h.style.pointerEvents = '');
         }
         isResizing = false;
         currentResizable = null;
@@ -1095,5 +1123,6 @@ function updateLauncherCheckboxes() {
 document.addEventListener('DOMContentLoaded', () => {
     initDraggableWindows();
     initResizableWindows();
+    initializeMap();
     updateLauncherCheckboxes();
 });
