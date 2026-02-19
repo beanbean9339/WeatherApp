@@ -59,6 +59,145 @@ function getUnitSymbol() {
 function getCityWeather(cityName) {
     document.getElementById('city').value = cityName;
     getWeather();
+    
+    // Also update the map pin and weather for this city
+    const apiKey = 'ae742a983d97f4208e6e659ba7fda017';
+    const geoUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${apiKey}`;
+    
+    fetch(geoUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.coord) {
+                updateMapPin(data.coord.lat, data.coord.lon);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching coordinates for map:', error);
+        });
+}
+
+// Weather condition finder - finds random locations with specific weather
+function findWeatherByCondition(condition) {
+    const status = document.getElementById('finder-status');
+    status.textContent = `🔍 Searching for ${condition}...`;
+    
+    // Large list of cities worldwide to check
+    const cities = [
+        'London', 'Paris', 'Tokyo', 'New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix',
+        'Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Mumbai', 'Delhi', 'Bangalore', 'Kolkata',
+        'Moscow', 'Saint Petersburg', 'Berlin', 'Munich', 'Madrid', 'Barcelona', 'Rome', 'Milan',
+        'Toronto', 'Montreal', 'Vancouver', 'Calgary', 'Mexico City', 'Guadalajara', 'Monterrey',
+        'São Paulo', 'Rio de Janeiro', 'Buenos Aires', 'Santiago', 'Lima', 'Bogota', 'Caracas',
+        'Istanbul', 'Ankara', 'Cairo', 'Lagos', 'Nairobi', 'Johannesburg', 'Cape Town',
+        'Bangkok', 'Singapore', 'Kuala Lumpur', 'Manila', 'Jakarta', 'Ho Chi Minh City',
+        'Seoul', 'Beijing', 'Shanghai', 'Hong Kong', 'Taipei', 'Osaka', 'Kyoto',
+        'Dubai', 'Abu Dhabi', 'Riyadh', 'Tel Aviv', 'Athens', 'Vienna', 'Prague',
+        'Amsterdam', 'Brussels', 'Copenhagen', 'Stockholm', 'Oslo', 'Helsinki', 'Reykjavik',
+        'Lisbon', 'Dublin', 'Edinburgh', 'Manchester', 'Birmingham', 'Glasgow',
+        'Seattle', 'San Francisco', 'Boston', 'Miami', 'Atlanta', 'Denver', 'Las Vegas',
+        'Portland', 'Austin', 'Dallas', 'Philadelphia', 'San Diego', 'Minneapolis',
+        'Auckland', 'Wellington', 'Christchurch', 'Fiji', 'Honolulu', 'Anchorage'
+    ];
+    
+    // Shuffle and check cities
+    const shuffled = cities.sort(() => Math.random() - 0.5);
+    const apiKey = 'ae742a983d97f4208e6e659ba7fda017';
+    
+    let checked = 0;
+    const maxChecks = 20;
+    
+    const checkNext = async () => {
+        if (checked >= maxChecks || checked >= shuffled.length) {
+            status.textContent = `😔 No ${condition} found. Try again!`;
+            return;
+        }
+        
+        const city = shuffled[checked];
+        checked++;
+        
+        try {
+            const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`);
+            const data = await response.json();
+            
+            if (data.cod === 200) {
+                const weatherMain = data.weather[0].main;
+                const currentTime = Date.now() / 1000;
+                const sunrise = data.sys.sunrise;
+                const sunset = data.sys.sunset;
+                
+                let match = false;
+                
+                // Check for weather match
+                if (condition === 'Mist') {
+                    // Match Mist, Fog, Haze, etc.
+                    match = ['Mist', 'Fog', 'Haze', 'Smoke'].includes(weatherMain);
+                } else if (condition === 'Thunderstorm') {
+                    match = weatherMain === 'Thunderstorm';
+                } else {
+                    match = weatherMain === condition;
+                }
+                
+                if (match) {
+                    status.textContent = `✨ Found ${condition} in ${city}!`;
+                    getCityWeather(city);
+                    return;
+                }
+            }
+        } catch (error) {
+            console.log(`Error checking ${city}:`, error);
+        }
+        
+        // Check next city
+        setTimeout(checkNext, 100);
+    };
+    
+    checkNext();
+}
+
+// Global function to update map pin from coordinates
+function updateMapPin(lat, lon) {
+    const pin = document.getElementById('pin');
+    const worldMap = document.getElementById('world-map');
+    const mapWrapper = document.getElementById('map-wrapper');
+    const mapInfo = document.getElementById('map-info');
+    
+    if (!pin || !worldMap || !mapWrapper) return;
+    
+    // Convert lat/lon to pixel position on map
+    // Map uses equirectangular projection
+    const rect = worldMap.getBoundingClientRect();
+    const wrapperRect = mapWrapper.getBoundingClientRect();
+    
+    const mapWidth = rect.width;
+    const mapHeight = rect.height;
+    
+    // Convert coordinates to pixel position
+    // Longitude: -180 to 180 maps to 0 to mapWidth
+    // Latitude: 90 to -90 maps to 0 to mapHeight
+    const pixelX = ((lon + 180) / 360) * mapWidth;
+    const pixelY = ((90 - lat) / 180) * mapHeight;
+    
+    // Position relative to wrapper
+    const pinX = rect.left - wrapperRect.left + pixelX;
+    const pinY = rect.top - wrapperRect.top + pixelY;
+    
+    pin.style.left = pinX + 'px';
+    pin.style.top = pinY + 'px';
+    pin.style.display = 'block';
+    
+    // Store the pin map position for dragging to continue working
+    if (window.currentPinMapX !== undefined) {
+        window.currentPinMapX = pixelX;
+        window.currentPinMapY = pixelY;
+    }
+    
+    // Add placement animation
+    pin.classList.remove('placed');
+    setTimeout(() => pin.classList.add('placed'), 10);
+    
+    // Update map info and fetch weather
+    mapInfo.innerHTML = `<strong>📍 Lat: ${lat.toFixed(2)}°, Lon: ${lon.toFixed(2)}°</strong> - Fetching...`;
+    getWeatherByCoordinates(lat, lon);
 }
 
 function switchTab(tabName) {
@@ -361,9 +500,12 @@ function displayMapWeather(data) {
             .catch(err => console.log('Geocoding error:', err));
     }
     
+    const localTime = getLocalTime(data.timezone);
+    
     const weatherHTML = `
         <div class="map-weather-card">
             <h3>${cityName}${country ? ', ' + country : ''}</h3>
+            <p class="local-time">🕐 Local Time: ${localTime}</p>
             <img src="${iconUrl}" alt="${description}" style="width: 100px; height: 100px;">
             <div class="map-temp">${temperature}${getUnitSymbol()}</div>
             <p class="map-description">${description}</p>
@@ -464,6 +606,7 @@ function displayWeather(data) {
         const description = data.weather[0].description;
         const iconCode = data.weather[0].icon;
         const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
+        const localTime = getLocalTime(data.timezone);
 
         const temperatureHTML = `
             <p>${temperature}${getUnitSymbol()}</p>
@@ -487,6 +630,7 @@ function displayWeather(data) {
 
         const weatherHtml = `
             <p>${cityName}${country ? ', ' + country : ''}</p>
+            <p class="local-time">🕐 ${localTime}</p>
             <p>${description}</p>
         `;
 
@@ -497,6 +641,11 @@ function displayWeather(data) {
 
         showImage();
         updateBackground(data.weather[0].main, iconCode);
+        
+        // Update map pin and weather for this location
+        if (data.coord) {
+            updateMapPin(data.coord.lat, data.coord.lon);
+        }
     }
 }
 
@@ -624,3 +773,327 @@ function createLightning() {
         }
     }, 500);
 }
+
+// Draggable window functionality
+let isDragging = false;
+let currentDraggable = null;
+let offsetX = 0;
+let offsetY = 0;
+
+function initDraggableWindows() {
+    const draggables = document.querySelectorAll('.draggable');
+    
+    draggables.forEach(draggable => {
+        const header = draggable.querySelector('.window-header');
+        if (!header) return;
+        
+        header.addEventListener('mousedown', (e) => {
+            // Don't drag if clicking on buttons
+            if (e.target.classList.contains('minimize-btn') || 
+                e.target.classList.contains('close-btn')) {
+                return;
+            }
+            
+            isDragging = true;
+            currentDraggable = draggable;
+            
+            const rect = draggable.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            
+            draggable.classList.add('dragging');
+            draggable.style.position = 'fixed';
+            draggable.style.zIndex = '1000';
+        });
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging || !currentDraggable) return;
+        
+        e.preventDefault();
+        
+        let newX = e.clientX - offsetX;
+        let newY = e.clientY - offsetY;
+        
+        // Keep window within viewport
+        const rect = currentDraggable.getBoundingClientRect();
+        const maxX = window.innerWidth - rect.width;
+        const maxY = window.innerHeight - rect.height;
+        
+        newX = Math.max(0, Math.min(newX, maxX));
+        newY = Math.max(0, Math.min(newY, maxY));
+        
+        currentDraggable.style.left = newX + 'px';
+        currentDraggable.style.top = newY + 'px';
+        currentDraggable.style.margin = '0';
+    });
+    
+    document.addEventListener('mouseup', () => {
+        if (currentDraggable) {
+            currentDraggable.classList.remove('dragging');
+            currentDraggable.style.zIndex = '100';
+        }
+        isDragging = false;
+        currentDraggable = null;
+    });
+}
+
+function minimizeWindow(windowId) {
+    const window = document.getElementById(windowId);
+    const taskbar = document.getElementById('taskbar');
+    
+    if (!window || !taskbar) return;
+    
+    window.classList.add('minimized');
+    taskbar.style.display = 'flex';
+    
+    // Create taskbar item if it doesn't exist
+    let taskbarItem = document.getElementById(`taskbar-${windowId}`);
+    if (!taskbarItem) {
+        taskbarItem = document.createElement('div');
+        taskbarItem.className = 'taskbar-item';
+        taskbarItem.id = `taskbar-${windowId}`;
+        
+        const title = window.querySelector('.window-title');
+        taskbarItem.textContent = title ? title.textContent : windowId;
+        
+        taskbarItem.onclick = () => restoreWindow(windowId);
+        taskbar.appendChild(taskbarItem);
+    }
+}
+
+function restoreWindow(windowId) {
+    const window = document.getElementById(windowId);
+    const taskbarItem = document.getElementById(`taskbar-${windowId}`);
+    const taskbar = document.getElementById('taskbar');
+    
+    if (!window) return;
+    
+    window.classList.remove('minimized');
+    
+    if (taskbarItem) {
+        taskbarItem.remove();
+    }
+    
+    // Hide taskbar if no items
+    const remainingItems = taskbar.querySelectorAll('.taskbar-item');
+    if (remainingItems.length === 0) {
+        taskbar.style.display = 'none';
+    }
+}
+
+function closeWindow(windowId) {
+    const window = document.getElementById(windowId);
+    const taskbarItem = document.getElementById(`taskbar-${windowId}`);
+    const taskbar = document.getElementById('taskbar');
+    
+    if (!window) return;
+    
+    window.style.display = 'none';
+    
+    if (taskbarItem) {
+        taskbarItem.remove();
+    }
+    
+    // Hide taskbar if no items
+    const remainingItems = taskbar.querySelectorAll('.taskbar-item');
+    if (remainingItems.length === 0) {
+        taskbar.style.display = 'none';
+    }
+    
+    // Update launcher checkbox
+    updateLauncherCheckboxes();
+}
+
+function getLocalTime(timezoneOffset) {
+    // timezoneOffset is in seconds, convert to milliseconds
+    const now = new Date();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const localTime = new Date(utc + (timezoneOffset * 1000));
+    
+    return localTime.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
+}
+
+// Resize variables
+let isResizing = false;
+let currentResizable = null;
+let resizeStartX = 0;
+let resizeStartY = 0;
+let resizeStartWidth = 0;
+let resizeStartHeight = 0;
+let resizeStartLeft = 0;
+let resizeStartTop = 0;
+let resizeDirection = '';
+
+function initResizableWindows() {
+    const resizables = document.querySelectorAll('.resizable');
+    
+    resizables.forEach(resizable => {
+        const handles = resizable.querySelectorAll('.resize-handle');
+        
+        handles.forEach(handle => {
+            handle.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                isResizing = true;
+                currentResizable = resizable;
+                
+                // Determine resize direction from class name
+                const classes = handle.className.split(' ');
+                resizeDirection = classes.find(c => c.startsWith('resize-')).replace('resize-', '');
+                
+                resizeStartX = e.clientX;
+                resizeStartY = e.clientY;
+                
+                const rect = resizable.getBoundingClientRect();
+                resizeStartWidth = rect.width;
+                resizeStartHeight = rect.height;
+                resizeStartLeft = rect.left;
+                resizeStartTop = rect.top;
+                
+                resizable.style.position = 'fixed';
+                resizable.style.transition = 'none';
+                resizable.classList.add('resizing');
+                document.body.style.cursor = handle.style.cursor || window.getComputedStyle(handle).cursor;
+                document.body.style.userSelect = 'none';
+            });
+        });
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing || !currentResizable) return;
+        
+        e.preventDefault();
+        
+        const deltaX = e.clientX - resizeStartX;
+        const deltaY = e.clientY - resizeStartY;
+        
+        let newWidth = resizeStartWidth;
+        let newHeight = resizeStartHeight;
+        let newLeft = resizeStartLeft;
+        let newTop = resizeStartTop;
+        
+        const minWidth = 300;
+        const minHeight = 200;
+        
+        // Apply resize based on direction
+        if (resizeDirection.includes('e')) {
+            newWidth = resizeStartWidth + deltaX;
+        }
+        if (resizeDirection.includes('w')) {
+            const widthChange = Math.min(deltaX, resizeStartWidth - minWidth);
+            newWidth = resizeStartWidth - widthChange;
+            newLeft = resizeStartLeft + widthChange;
+        }
+        if (resizeDirection.includes('s')) {
+            newHeight = resizeStartHeight + deltaY;
+        }
+        if (resizeDirection.includes('n')) {
+            const heightChange = Math.min(deltaY, resizeStartHeight - minHeight);
+            newHeight = resizeStartHeight - heightChange;
+            newTop = resizeStartTop + heightChange;
+        }
+        
+        // Apply minimum and maximum constraints
+        newWidth = Math.max(minWidth, Math.min(newWidth, window.innerWidth - newLeft - 20));
+        newHeight = Math.max(minHeight, Math.min(newHeight, window.innerHeight - newTop - 80));
+        
+        currentResizable.style.width = newWidth + 'px';
+        currentResizable.style.height = newHeight + 'px';
+        currentResizable.style.left = newLeft + 'px';
+        currentResizable.style.top = newTop + 'px';
+        currentResizable.style.overflow = 'auto';
+        
+        // Adjust grid layout for narrow widths
+        const citiesGrid = currentResizable.querySelector('#cities-grid');
+        const finderButtons = currentResizable.querySelector('#weather-finder');
+        
+        if (citiesGrid && newWidth < 500) {
+            citiesGrid.style.gridTemplateColumns = '1fr';
+        } else if (citiesGrid) {
+            citiesGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+        }
+        
+        if (finderButtons && newWidth < 450) {
+            finderButtons.style.gridTemplateColumns = '1fr';
+        } else if (finderButtons) {
+            finderButtons.style.gridTemplateColumns = 'repeat(2, 1fr)';
+        }
+    });
+    
+    document.addEventListener('mouseup', () => {
+        if (currentResizable) {
+            currentResizable.style.transition = '';
+            currentResizable.classList.remove('resizing');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }
+        isResizing = false;
+        currentResizable = null;
+        resizeDirection = '';
+    });
+}
+
+function toggleLauncher() {
+    const menu = document.getElementById('launcher-menu');
+    if (menu.style.display === 'none' || menu.style.display === '') {
+        menu.style.display = 'block';
+        updateLauncherCheckboxes();
+    } else {
+        menu.style.display = 'none';
+    }
+}
+
+function toggleWindowVisibility(windowId) {
+    const window = document.getElementById(windowId);
+    const checkbox = document.getElementById(`toggle-${windowId}`);
+    
+    if (!window) return;
+    
+    if (checkbox.checked) {
+        // Show window
+        window.style.display = '';
+        window.classList.remove('minimized');
+        
+        // Remove from taskbar if present
+        const taskbarItem = document.getElementById(`taskbar-${windowId}`);
+        if (taskbarItem) {
+            taskbarItem.remove();
+        }
+        
+        // Hide taskbar if empty
+        const taskbar = document.getElementById('taskbar');
+        const remainingItems = taskbar.querySelectorAll('.taskbar-item');
+        if (remainingItems.length === 0) {
+            taskbar.style.display = 'none';
+        }
+    } else {
+        // Hide window
+        closeWindow(windowId);
+    }
+}
+
+function updateLauncherCheckboxes() {
+    const windows = ['world-view', 'weather-finder-window', 'weather-container', 'map-container'];
+    
+    windows.forEach(windowId => {
+        const window = document.getElementById(windowId);
+        const checkbox = document.getElementById(`toggle-${windowId}`);
+        
+        if (window && checkbox) {
+            checkbox.checked = window.style.display !== 'none';
+        }
+    });
+}
+
+// Initialize draggable windows on page load
+document.addEventListener('DOMContentLoaded', () => {
+    initDraggableWindows();
+    initResizableWindows();
+    updateLauncherCheckboxes();
+});

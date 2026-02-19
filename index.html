@@ -3,23 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RetroCast - Your Mood-First Weather Experience</title>
+    <title>Weather Dashboard - Your Mood-First Weather Experience</title>
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
     <div id="rain-container"></div>
     <div id="snow-container"></div>
     
-    <!-- Tab Navigation -->
-    <div id="tab-navigation">
-        <button class="tab-btn active" onclick="switchTab('main')">Home</button>
-        <button class="tab-btn" onclick="switchTab('map')">Explore</button>
-    </div>
-    
-    <!-- Main Weather Tab -->
+    <!-- Main Content -->
     <div id="main-tab" class="tab-content active">
-        <div id="world-view">
-            <h3>Popular Destinations</h3>
+        <div id="world-view" class="draggable resizable">
+            <div class="window-header">
+                <span class="window-title">Popular Destinations</span>
+                <div class="window-controls">
+                    <button class="minimize-btn" onclick="minimizeWindow('world-view')" title="Minimize">−</button>
+                    <button class="close-btn" onclick="closeWindow('world-view')" title="Close">×</button>
+                </div>
+            </div>
+            <div class="resize-handle resize-n"></div>
+            <div class="resize-handle resize-s"></div>
+            <div class="resize-handle resize-e"></div>
+            <div class="resize-handle resize-w"></div>
+            <div class="resize-handle resize-ne"></div>
+            <div class="resize-handle resize-nw"></div>
+            <div class="resize-handle resize-se"></div>
+            <div class="resize-handle resize-sw"></div>
             <div id="cities-grid">
                 <div class="city-card" onclick="getCityWeather('Tokyo')">Tokyo</div>
                 <div class="city-card" onclick="getCityWeather('New York')">New York</div>
@@ -36,8 +44,53 @@
             </div>
         </div>
         
-        <div id="weather-container">
-            <h2>RetroCast</h2>
+        <!-- Weather Finder Window -->
+        <div id="weather-finder-window" class="draggable resizable">
+            <div class="window-header">
+                <span class="window-title">Weather Finder</span>
+                <div class="window-controls">
+                    <button class="minimize-btn" onclick="minimizeWindow('weather-finder-window')" title="Minimize">−</button>
+                    <button class="close-btn" onclick="closeWindow('weather-finder-window')" title="Close">×</button>
+                </div>
+            </div>
+            <div class="resize-handle resize-n"></div>
+            <div class="resize-handle resize-s"></div>
+            <div class="resize-handle resize-e"></div>
+            <div class="resize-handle resize-w"></div>
+            <div class="resize-handle resize-ne"></div>
+            <div class="resize-handle resize-nw"></div>
+            <div class="resize-handle resize-se"></div>
+            <div class="resize-handle resize-sw"></div>
+            <div id="weather-finder">
+                <h4>Find Weather 🎲</h4>
+                <div class="finder-buttons">
+                    <button class="finder-btn" onclick="findWeatherByCondition('Rain')" title="Find Rain">🌧️ Rainy</button>
+                    <button class="finder-btn" onclick="findWeatherByCondition('Snow')" title="Find Snow">❄️ Snowy</button>
+                    <button class="finder-btn" onclick="findWeatherByCondition('Clear')" title="Find Clear">☀️ Clear</button>
+                    <button class="finder-btn" onclick="findWeatherByCondition('Clouds')" title="Find Cloudy">☁️ Cloudy</button>
+                    <button class="finder-btn" onclick="findWeatherByCondition('Thunderstorm')" title="Find Thunderstorm">⛈️ Stormy</button>
+                    <button class="finder-btn" onclick="findWeatherByCondition('Mist')" title="Find Foggy">🌫️ Foggy</button>
+                </div>
+                <div id="finder-status"></div>
+            </div>
+        </div>
+        
+        <div id="weather-container" class="draggable resizable">
+            <div class="window-header">
+                <span class="window-title">Weather Dashboard</span>
+                <div class="window-controls">
+                    <button class="minimize-btn" onclick="minimizeWindow('weather-container')" title="Minimize">−</button>
+                    <button class="close-btn" onclick="closeWindow('weather-container')" title="Close">×</button>
+                </div>
+            </div>
+            <div class="resize-handle resize-n"></div>
+            <div class="resize-handle resize-s"></div>
+            <div class="resize-handle resize-e"></div>
+            <div class="resize-handle resize-w"></div>
+            <div class="resize-handle resize-ne"></div>
+            <div class="resize-handle resize-nw"></div>
+            <div class="resize-handle resize-se"></div>
+            <div class="resize-handle resize-sw"></div>
             <div id="temp-toggle">
                 <span class="temp-unit active" onclick="toggleTemperature('C')">°C</span>
                 <span class="temp-unit" onclick="toggleTemperature('F')">°F</span>
@@ -55,10 +108,24 @@
         </div>
     </div>
     
-    <!-- World Map Tab -->
-    <div id="map-tab" class="tab-content">
-        <div id="map-container">
-            <h2 id="map-title">Explore the World</h2>
+    <!-- World Map Section -->
+    <div id="map-tab" class="tab-content active">
+        <div id="map-container" class="draggable resizable">
+            <div class="window-header">
+                <span class="window-title">Explore the World</span>
+                <div class="window-controls">
+                    <button class="minimize-btn" onclick="minimizeWindow('map-container')" title="Minimize">−</button>
+                    <button class="close-btn" onclick="closeWindow('map-container')" title="Close">×</button>
+                </div>
+            </div>
+            <div class="resize-handle resize-n"></div>
+            <div class="resize-handle resize-s"></div>
+            <div class="resize-handle resize-e"></div>
+            <div class="resize-handle resize-w"></div>
+            <div class="resize-handle resize-ne"></div>
+            <div class="resize-handle resize-nw"></div>
+            <div class="resize-handle resize-se"></div>
+            <div class="resize-handle resize-sw"></div>
             <div id="map-temp-toggle">
                 <span class="temp-unit active" onclick="toggleTemperature('C')">°C</span>
                 <span class="temp-unit" onclick="toggleTemperature('F')">°F</span>
@@ -77,6 +144,34 @@
             <div id="map-weather-display">
                 <p>Pin a location to see its atmospheric mood</p>
             </div>
+        </div>
+    </div>
+    
+    <!-- Taskbar for minimized windows -->
+    <div id="taskbar" class="taskbar" style="display: none;"></div>
+    
+    <!-- Window Launcher -->
+    <button id="window-launcher" onclick="toggleLauncher()" title="Window Manager">
+        <span>☰</span>
+    </button>
+    
+    <div id="launcher-menu" style="display: none;">
+        <h3>Window Manager</h3>
+        <div class="launcher-item">
+            <input type="checkbox" id="toggle-world-view" checked onchange="toggleWindowVisibility('world-view')">
+            <label for="toggle-world-view">Popular Destinations</label>
+        </div>
+        <div class="launcher-item">
+            <input type="checkbox" id="toggle-weather-finder-window" checked onchange="toggleWindowVisibility('weather-finder-window')">
+            <label for="toggle-weather-finder-window">Weather Finder</label>
+        </div>
+        <div class="launcher-item">
+            <input type="checkbox" id="toggle-weather-container" checked onchange="toggleWindowVisibility('weather-container')">
+            <label for="toggle-weather-container">Weather Dashboard</label>
+        </div>
+        <div class="launcher-item">
+            <input type="checkbox" id="toggle-map-container" checked onchange="toggleWindowVisibility('map-container')">
+            <label for="toggle-map-container">Explore the World</label>
         </div>
     </div>
     
