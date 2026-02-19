@@ -465,7 +465,7 @@ body.default {
     align-items: center;
 }
 
-.minimize-btn, .close-btn {
+.minimize-btn, .close-btn, .fullscreen-btn {
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -484,7 +484,7 @@ body.default {
     min-width: 32px;
 }
 
-.minimize-btn:hover {
+.minimize-btn:hover, .fullscreen-btn:hover {
     background: rgba(242, 204, 143, 0.4);
     transform: scale(1.1);
 }
@@ -507,6 +507,24 @@ body.default {
 .dragging {
     opacity: 0.9;
     cursor: grabbing;
+}
+
+/* Fullscreen state */
+.fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    z-index: 9999 !important;
+    margin: 0 !important;
+    transition: all 0.3s ease;
+}
+
+.fullscreen .resize-handle {
+    display: none !important;
 }
 
 .resizing {
@@ -561,10 +579,14 @@ body.default {
     position: absolute;
     z-index: 20;
     transition: all 0.2s ease;
-    pointer-events: none;
+    pointer-events: auto;
 }
 
-.resize-handle:hover {
+/* Edge handles - default pointer-events */
+.resize-n,
+.resize-s,
+.resize-e,
+.resize-w {
     pointer-events: auto;
 }
 
@@ -928,8 +950,8 @@ body.default {
     border-radius: 40px;
     backdrop-filter: blur(12px);
     border: 4px solid rgba(242, 204, 143, 0.3);
-    width: 900px;
-    height: auto;
+    min-width: 900px;
+    min-height: 400px;
     max-height: 85vh;
     overflow-y: auto;
     position: fixed;
@@ -1268,8 +1290,8 @@ body.default {
     border-radius: 35px;
     backdrop-filter: blur(10px);
     border: 4px solid rgba(242, 204, 143, 0.3);
-    width: 360px;
-    height: auto;
+    min-width: 360px;
+    min-height: 400px;
     max-height: 85vh;
     overflow-y: auto;
     position: fixed;
@@ -1415,8 +1437,8 @@ body.default {
     border-radius: 35px;
     backdrop-filter: blur(10px);
     border: 4px solid rgba(242, 204, 143, 0.3);
-    width: 360px;
-    height: auto;
+    min-width: 360px;
+    min-height: 300px;
     max-height: 85vh;
     overflow-y: auto;
     position: fixed;
@@ -1435,8 +1457,8 @@ body.default {
     border-radius: 35px;
     backdrop-filter: blur(10px);
     border: 4px solid rgba(242, 204, 143, 0.3);
-    width: 380px;
-    height: auto;
+    min-width: 380px;
+    min-height: 350px;
     max-height: 85vh;
     overflow-y: auto;
     position: fixed;
@@ -1455,8 +1477,8 @@ body.default {
     border-radius: 35px;
     backdrop-filter: blur(10px);
     border: 4px solid rgba(242, 204, 143, 0.3);
-    width: 400px;
-    height: auto;
+    min-width: 400px;
+    min-height: 250px;
     position: fixed;
     top: 30px;
     right: 30px;
@@ -1495,8 +1517,8 @@ body.default {
 
 .flip-unit {
     position: relative;
-    width: 60px;
-    height: 80px;
+    width: 70px;
+    height: 90px;
     perspective: 1000px;
 }
 
@@ -1518,47 +1540,68 @@ body.default {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 36px;
+    font-size: 40px;
     font-weight: 700;
     color: #f2cc8f;
     font-family: 'Courier New', monospace;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    overflow: hidden;
+    overflow: visible;
     backface-visibility: hidden;
+    box-sizing: border-box;
 }
 
 .flip-card-top {
     top: 0;
     align-items: flex-end;
-    padding-bottom: 5px;
+    padding-bottom: 2px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.5);
     transform-origin: bottom;
+    clip-path: inset(0 0 0 0);
 }
 
 .flip-card-bottom {
     bottom: 0;
     align-items: flex-start;
-    padding-top: 5px;
+    padding-top: 2px;
     border-top: 1px solid rgba(242, 204, 143, 0.2);
     transform-origin: top;
+    clip-path: inset(0 0 0 0);
 }
 
 .flip-card.flipping .flip-card-top {
-    animation: flipTop 0.6s ease-in-out;
+    animation: flipTop 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 .flip-card.flipping .flip-card-bottom {
-    animation: flipBottom 0.6s ease-in-out;
+    animation: flipBottom 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 @keyframes flipTop {
-    0% { transform: rotateX(0deg); }
-    100% { transform: rotateX(-90deg); }
+    0% { 
+        transform: rotateX(0deg); 
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% { 
+        transform: rotateX(-90deg); 
+        opacity: 0.6;
+    }
 }
 
 @keyframes flipBottom {
-    0% { transform: rotateX(90deg); }
-    100% { transform: rotateX(0deg); }
+    0% { 
+        transform: rotateX(90deg); 
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% { 
+        transform: rotateX(0deg); 
+        opacity: 1;
+    }
 }
 
 .flip-colon {
@@ -1589,8 +1632,8 @@ body.default {
     border-radius: 35px;
     backdrop-filter: blur(10px);
     border: 4px solid rgba(242, 204, 143, 0.3);
-    width: 320px;
-    height: auto;
+    min-width: 320px;
+    min-height: 200px;
     position: fixed;
     bottom: 30px;
     right: 30px;
@@ -2038,8 +2081,8 @@ body.default {
 
 #weather-container {
     background: rgba(61, 44, 41, 0.85);
-    width: 480px;
-    height: auto;
+    min-width: 480px;
+    min-height: 400px;
     padding: 40px 45px;
     border-radius: 40px;
     box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35),

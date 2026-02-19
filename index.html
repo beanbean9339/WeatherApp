@@ -51,6 +51,7 @@
             <div class="window-header">
                 <span class="window-title">Popular Destinations</span>
                 <div class="window-controls">
+                    <button class="fullscreen-btn" onclick="toggleFullscreen('world-view')" title="Fullscreen">⛶</button>
                     <button class="minimize-btn" onclick="minimizeWindow('world-view')" title="Minimize">−</button>
                     <button class="close-btn" onclick="closeWindow('world-view')" title="Close">×</button>
                 </div>
@@ -84,6 +85,7 @@
             <div class="window-header">
                 <span class="window-title">How It Works</span>
                 <div class="window-controls">
+                    <button class="fullscreen-btn" onclick="toggleFullscreen('directions-window')" title="Fullscreen">⛶</button>
                     <button class="minimize-btn" onclick="minimizeWindow('directions-window')" title="Minimize">−</button>
                     <button class="close-btn" onclick="closeWindow('directions-window')" title="Close">×</button>
                 </div>
@@ -98,23 +100,27 @@
             <div class="resize-handle resize-sw"></div>
             <div id="directions-content">
                 <h4>🌤️ Welcome to Weather Dashboard</h4>
-                <div class="direction-section">
+                <div class="direction-section" onclick="bringWindowToFront('world-view')" style="cursor: pointer;">
                     <h5>🎯 Popular Destinations</h5>
                     <p>Click any city card to instantly view its weather</p>
                 </div>
-                <div class="direction-section">
+                <div class="direction-section" onclick="bringWindowToFront('weather-finder-window')" style="cursor: pointer;">
                     <h5>🎲 Weather Finder</h5>
                     <p>Click a weather button to discover a random city with your desired conditions</p>
                 </div>
-                <div class="direction-section">
+                <div class="direction-section" onclick="bringWindowToFront('weather-container')" style="cursor: pointer;">
+                    <h5>🌡️ Weather Dashboard</h5>
+                    <p>Enter any city name to get detailed weather information, forecasts, and more</p>
+                </div>
+                <div class="direction-section" onclick="bringWindowToFront('clock-window')" style="cursor: pointer;">
                     <h5>🕐 Local Time Clock</h5>
                     <p>Watch the flip clock update with the local time of any location you explore</p>
                 </div>
-                <div class="direction-section">
+                <div class="direction-section" onclick="bringWindowToFront('current-location-window')" style="cursor: pointer;">
                     <h5>📍 My Location</h5>
                     <p>Click "Get My Location" to instantly view weather at your current coordinates</p>
                 </div>
-                <div class="direction-section">
+                <div class="direction-section" onclick="bringWindowToFront('map-container')" style="cursor: pointer;">
                     <h5>🗺️ Explore the World</h5>
                     <p>Click anywhere on the map or drag the pin to explore weather at any location</p>
                 </div>
@@ -126,6 +132,7 @@
             <div class="window-header">
                 <span class="window-title">Weather Finder</span>
                 <div class="window-controls">
+                    <button class="fullscreen-btn" onclick="toggleFullscreen('weather-finder-window')" title="Fullscreen">⛶</button>
                     <button class="minimize-btn" onclick="minimizeWindow('weather-finder-window')" title="Minimize">−</button>
                     <button class="close-btn" onclick="closeWindow('weather-finder-window')" title="Close">×</button>
                 </div>
@@ -157,6 +164,7 @@
             <div class="window-header">
                 <span class="window-title">Local Time</span>
                 <div class="window-controls">
+                    <button class="fullscreen-btn" onclick="toggleFullscreen('clock-window')" title="Fullscreen">⛶</button>
                     <button class="minimize-btn" onclick="minimizeWindow('clock-window')" title="Minimize">−</button>
                     <button class="close-btn" onclick="closeWindow('clock-window')" title="Close">×</button>
                 </div>
@@ -205,6 +213,7 @@
             <div class="window-header">
                 <span class="window-title">My Location</span>
                 <div class="window-controls">
+                    <button class="fullscreen-btn" onclick="toggleFullscreen('current-location-window')" title="Fullscreen">⛶</button>
                     <button class="minimize-btn" onclick="minimizeWindow('current-location-window')" title="Minimize">−</button>
                     <button class="close-btn" onclick="closeWindow('current-location-window')" title="Close">×</button>
                 </div>
@@ -227,6 +236,7 @@
             <div class="window-header">
                 <span class="window-title">Weather Dashboard</span>
                 <div class="window-controls">
+                    <button class="fullscreen-btn" onclick="toggleFullscreen('weather-container')" title="Fullscreen">⛶</button>
                     <button class="minimize-btn" onclick="minimizeWindow('weather-container')" title="Minimize">−</button>
                     <button class="close-btn" onclick="closeWindow('weather-container')" title="Close">×</button>
                 </div>
@@ -262,6 +272,7 @@
             <div class="window-header">
                 <span class="window-title">Explore the World</span>
                 <div class="window-controls">
+                    <button class="fullscreen-btn" onclick="toggleFullscreen('map-container')" title="Fullscreen">⛶</button>
                     <button class="minimize-btn" onclick="minimizeWindow('map-container')" title="Minimize">−</button>
                     <button class="close-btn" onclick="closeWindow('map-container')" title="Close">×</button>
                 </div>

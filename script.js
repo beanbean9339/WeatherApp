@@ -819,6 +819,13 @@ function bringToFront(element) {
     console.log(`Bringing ${element.id} to front with z-index: ${highestZIndex}`);
 }
 
+function bringWindowToFront(windowId) {
+    const window = document.getElementById(windowId);
+    if (window) {
+        bringToFront(window);
+    }
+}
+
 function initDraggableWindows() {
     const draggables = document.querySelectorAll('.draggable');
     
@@ -844,7 +851,8 @@ function initDraggableWindows() {
         header.addEventListener('mousedown', (e) => {
             // Don't drag if clicking on buttons
             if (e.target.classList.contains('minimize-btn') || 
-                e.target.classList.contains('close-btn')) {
+                e.target.classList.contains('close-btn') ||
+                e.target.classList.contains('fullscreen-btn')) {
                 return;
             }
             
@@ -857,6 +865,12 @@ function initDraggableWindows() {
             
             draggable.classList.add('dragging');
             draggable.style.position = 'fixed';
+            // Remove bottom/right positioning to allow top/left to work
+            draggable.style.bottom = 'auto';
+            draggable.style.right = 'auto';
+            // Set current position using top/left
+            draggable.style.left = rect.left + 'px';
+            draggable.style.top = rect.top + 'px';
         });
     });
     
@@ -955,6 +969,36 @@ function closeWindow(windowId) {
     
     // Update launcher checkbox
     updateLauncherCheckboxes();
+}
+
+// Fullscreen functionality
+const windowStates = new Map();
+
+function toggleFullscreen(windowId) {
+    const window = document.getElementById(windowId);
+    if (!window) return;
+    
+    if (window.classList.contains('fullscreen')) {
+        // Exit fullscreen - restore previous state
+        const previousState = windowStates.get(windowId);
+        if (previousState) {
+            window.style.top = previousState.top;
+            window.style.left = previousState.left;
+            window.style.width = previousState.width;
+            window.style.height = previousState.height;
+        }
+        window.classList.remove('fullscreen');
+    } else {
+        // Enter fullscreen - save current state
+        windowStates.set(windowId, {
+            top: window.style.top || getComputedStyle(window).top,
+            left: window.style.left || getComputedStyle(window).left,
+            width: window.style.width || getComputedStyle(window).width,
+            height: window.style.height || getComputedStyle(window).height
+        });
+        window.classList.add('fullscreen');
+        bringToFront(window);
+    }
 }
 
 function getLocalTime(timezoneOffset) {
